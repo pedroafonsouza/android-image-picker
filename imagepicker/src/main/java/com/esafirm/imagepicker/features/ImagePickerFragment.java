@@ -299,14 +299,19 @@ public class ImagePickerFragment extends Fragment implements ImagePickerView {
     private void requestExternalPermission() {
         logger.w("External permission is not granted. Requesting permission");
 
-        final String[] permissions = new String[]{REQUIRED_EXTERNAL_STORAGE_PERMISSION};
+        String[] permissions = new String[]{REQUIRED_EXTERNAL_STORAGE_PERMISSION};
 
-        if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), REQUIRED_EXTERNAL_STORAGE_PERMISSION)) {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), REQUIRED_EXTERNAL_STORAGE_PERMISSION) && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             requestPermissions(permissions, RC_PERMISSION_REQUEST_EXTERNAL_STORAGE);
         } else {
             final String permission = PREF_EXTERNAL_STORAGE_REQUESTED;
             if (!preferences.isPermissionRequested(permission)) {
                 preferences.setPermissionRequested(permission);
+
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+                    permissions = new String[]{Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO};
+                }
+
                 requestPermissions(permissions, RC_PERMISSION_REQUEST_EXTERNAL_STORAGE);
             } else {
                 snackBarView.show(R.string.ef_msg_no_external_permission, v -> openAppSettings());
